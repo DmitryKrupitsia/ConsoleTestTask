@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using HysConsoleTestTask.Models;
 using HysConsoleTestTask.Services;
 
-string conn=null!;
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureLogging(logging =>
     {
@@ -20,9 +19,8 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-        conn = connectionString;
         services.AddDbContext<HysTestTaskDbContext>(options =>
-            options.UseSqlServer(connectionString)); // <- ничего лишнего
+            options.UseSqlServer(connectionString)); 
         services.AddScoped<ITaskService, TaskService>();
     })
     .Build();
@@ -31,7 +29,6 @@ var host = Host.CreateDefaultBuilder(args)
 
 using var scope = host.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<HysTestTaskDbContext>();
-Console.WriteLine("Connection string:"+ conn);
 
 var service = scope.ServiceProvider.GetRequiredService<ITaskService>();
 Console.Clear();
