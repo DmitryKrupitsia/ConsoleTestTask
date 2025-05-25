@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HysConsoleTestTask": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
