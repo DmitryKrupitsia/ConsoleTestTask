@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+   sqlserver:
+      build:
+        context: .
+        dockerfile: Dockerfile.sql
+      container_name: hys_sql
+      environment:
+        SA_PASSWORD: "Query1234"
+        ACCEPT_EULA: "Y"
+      ports:
+        - "1433:1433"
+      volumes:
+        - sqlvolume:/var/opt/mssql
+        - ./sql/init.sql:/init.sql:ro
+      command: >
+        /bin/bash -c "
+          /opt/mssql/bin/sqlservr & 
+          sleep 20 && 
+          sqlcmd -S localhost -U sa -P 'Query1234' -i /init.sql &&
+          touch /tmp/ready &&
+          wait
+        "
+      healthcheck:
+        test: ["CMD", "test", "-f", "/tmp/ready"]
+        interval: 5s
+        timeout: 3s
+        retries: 10
+
+
+   app:
+     build: .
+     container_name: hys_app
+     depends_on:
+       sqlserver:
+         condition: service_healthy
+     environment:
+       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=HysTestTaskDb;User Id=sa;Password=Query1234;TrustServerCertificate=True;"
+     stdin_open: true
+     tty: true
+     command: ["dotnet", "HysConsoleTestTask.dll"]
+
+volumes:
+  sqlvolume:
